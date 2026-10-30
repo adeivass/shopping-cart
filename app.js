@@ -41,9 +41,14 @@ const inventory = [
   { id: 'palm-jaggery-powder', name: 'Palm Jaggery Powder', category: 'Flours & Sweeteners', unit: 'pack', stock: 3, icon: '🍯' },
 ];
 
+const MAX_ITEM_STOCK = 100;
+inventory.forEach((product) => { product.stock = MAX_ITEM_STOCK; });
+window.GROCERY_INVENTORY = inventory;
+
 // Set this to the shop's digits-only international WhatsApp number when available.
 // Leave it blank to let customers choose a WhatsApp recipient after tapping Share.
 const SHOP_WHATSAPP_NUMBER = '';
+window.GROCERY_WHATSAPP_NUMBER = SHOP_WHATSAPP_NUMBER;
 const CART_STORAGE_KEY = 'field-fork-cart-v1';
 const categoryNames = ['All items', ...new Set(inventory.map((product) => product.category))];
 const categoryColors = {
@@ -78,7 +83,9 @@ const elements = {
   products: document.querySelector('#products'),
   search: document.querySelector('#product-search'),
   noResults: document.querySelector('#no-results'),
+  productCount: document.querySelector('#product-count'),
   cartCount: document.querySelector('#cart-count'),
+  mobileCartCount: document.querySelector('#mobile-cart-count'),
   drawerCount: document.querySelector('#drawer-count'),
   drawer: document.querySelector('#cart-drawer'),
   scrim: document.querySelector('#drawer-scrim'),
@@ -136,14 +143,15 @@ function renderProducts() {
       <div class="product-image-wrap ${categoryColors[product.category] || 'grain'}">
         <span class="product-illustration" aria-hidden="true">${product.icon}</span>
         <span class="product-badge">${escapeHtml(product.category)}</span>
-        <button class="add-button" type="button" data-add="${product.id}" aria-label="Add ${escapeHtml(product.name)} to basket" ${soldOut ? 'disabled' : ''}>${soldOut ? '✓' : '+'}</button>
       </div>
       <div class="product-details">
         <div class="product-topline"><span class="product-name">${escapeHtml(product.name)}</span><span class="product-price">Ask us</span></div>
         <div class="product-meta"><span class="product-origin">${escapeHtml(stockText)}</span><span>Price on request</span></div>
+        <button class="add-button" type="button" data-add="${product.id}" aria-label="Add ${escapeHtml(product.name)} to basket" ${soldOut ? 'disabled' : ''}>${soldOut ? '✓ Added' : '＋ Add to basket'}</button>
       </div>
     </article>`;
   }).join('');
+  elements.productCount.textContent = `${shown.length} ${shown.length === 1 ? 'product' : 'products'}${query ? ' found' : ' available'}`;
   elements.noResults.hidden = shown.length > 0;
 }
 
@@ -151,6 +159,7 @@ function renderCart() {
   const itemCount = totalCartQuantity();
   const products = getCartProducts();
   elements.cartCount.textContent = itemCount;
+  elements.mobileCartCount.textContent = itemCount;
   elements.drawerCount.textContent = `(${itemCount})`;
   elements.emptyCart.classList.toggle('show', products.length === 0);
   elements.cartItems.classList.toggle('hidden', products.length === 0);
@@ -301,6 +310,7 @@ function renderReceipt(order) {
   whatsappLink.onclick = () => { document.querySelector('#receipt-status').textContent = 'Opening WhatsApp with your order details.'; };
 }
 
+if (elements.categories) {
 elements.categories.addEventListener('click', (event) => {
   const button = event.target.closest('[data-category]');
   if (!button) return;
@@ -323,6 +333,11 @@ elements.cartItems.addEventListener('click', (event) => {
 
 elements.search.addEventListener('input', renderProducts);
 document.querySelector('#open-cart').addEventListener('click', openDrawer);
+document.querySelector('#mobile-cart').addEventListener('click', openDrawer);
+document.querySelector('#mobile-search').addEventListener('click', () => {
+  document.querySelector('#shop').scrollIntoView({ behavior: 'smooth' });
+  window.setTimeout(() => elements.search.focus({ preventScroll: true }), 350);
+});
 document.querySelector('#close-cart').addEventListener('click', closeDrawer);
 elements.scrim.addEventListener('click', closeDrawer);
 document.querySelector('#keep-shopping').addEventListener('click', () => {
@@ -387,3 +402,4 @@ document.addEventListener('keydown', (event) => {
 
 renderCategories();
 renderCart();
+}

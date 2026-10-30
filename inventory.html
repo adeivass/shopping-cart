@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8f8f2" />
+    <meta name="description" content="Count and prepare a shareable inventory report for Field & Fork grocery." />
+    <title>Inventory count — Field &amp; Fork</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="inventory.css" />
+    <link rel="stylesheet" href="count-stepper.css" />
+    <script src="app.js" defer></script>
+    <script src="inventory-page.js" defer></script>
+  </head>
+  <body class="inventory-page">
+    <div class="announcement"><span class="announcement-dot"></span> FIELD &amp; FORK · STOCKTAKE</div>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Field and Fork storefront"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-name">field <em>&amp;</em> fork<span class="brand-period">.</span></span></a>
+      <nav class="main-nav" aria-label="Main navigation"><a href="index.html">Shop</a><a href="inventory.html" aria-current="page">Inventory</a></nav>
+      <a class="cart-trigger inventory-shop-link" href="index.html">Back to shop <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main class="inventory-main">
+      <section class="inventory-intro">
+        <div class="eyebrow"><span class="eyebrow-line"></span> YOUR STOCKTAKE WORKSPACE</div>
+        <div class="inventory-heading-row"><div><h1>Count what’s <em>on the shelf.</em></h1><p>Enter the quantity you have for each product. Your progress stays in this browser tab until you close it.</p></div><div class="count-progress" aria-live="polite"><strong id="count-progress-number">0 / 40</strong><span>products counted</span></div></div>
+        <div class="inventory-summary"><div><span class="summary-icon">▤</span><span><strong id="counted-products">0</strong><small>Counted products</small></span></div><div><span class="summary-icon">∑</span><span><strong id="total-units">0</strong><small>Total units counted</small></span></div><div><span class="summary-icon">↻</span><span><strong>Auto-saved</strong><small>For this tab session</small></span></div></div>
+      </section>
+
+      <section class="inventory-tool" aria-label="Inventory count form">
+        <div class="inventory-toolbar"><label class="inventory-search"><span aria-hidden="true">⌕</span><input id="inventory-search" type="search" placeholder="Find a product to count…" aria-label="Search inventory products" /></label><label class="inventory-category-label" for="inventory-category">Category</label><select id="inventory-category" aria-label="Filter by category"></select><button class="clear-counts" id="clear-counts" type="button">Clear counts</button></div>
+        <div class="inventory-list-head"><span>PRODUCT</span><span>CATEGORY</span><span>COUNT <small>(MAX 100)</small></span></div>
+        <div class="inventory-list" id="inventory-list"></div>
+        <p class="inventory-empty" id="inventory-empty" hidden>No matching products. Try a different search or category.</p>
+        <div class="inventory-footer"><span id="autosave-status" aria-live="polite">Counts save automatically.</span><button class="button button-dark generate-report" id="generate-report" type="button">Generate inventory report <span>↗</span></button></div>
+      </section>
+
+      <section class="inventory-report" id="report-section" hidden aria-labelledby="report-title">
+        <div class="report-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> READY TO SHARE</div><h2 id="report-title">Inventory report</h2><p id="report-meta"></p></div><span class="report-saved-badge">Saved in this session</span></div>
+        <pre class="report-preview" id="report-preview"></pre>
+        <div class="report-actions"><button class="button button-dark" id="copy-report" type="button">Copy report <span>▣</span></button><a class="button button-whatsapp" id="share-report" href="#" target="_blank" rel="noopener noreferrer"><span class="whatsapp-icon">◉</span> Send on WhatsApp <span>↗</span></a></div>
+        <p class="report-status" id="report-status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <nav class="mobile-quick-nav inventory-mobile-nav" aria-label="Quick navigation"><a href="index.html"><span aria-hidden="true">⌂</span>Shop</a><a href="#inventory-list"><span aria-hidden="true">▤</span>Count</a><button id="mobile-generate-report" type="button"><span aria-hidden="true">↗</span>Report</button></nav>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
