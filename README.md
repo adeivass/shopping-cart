@@ -2,7 +2,7 @@
 
 A responsive, no-build grocery storefront for the sample inventory. It includes category filters, search, stock-aware cart controls (up to 100 units per item), a session-storage cart, and a shareable checkout receipt. Mobile shoppers get persistent shortcuts and larger add-to-basket buttons.
 
-The separate `inventory.html` page lets staff count products, auto-saves counts and the latest report in browser `localStorage`, and generates a stocktake report that can be copied or shared through WhatsApp. These inventory records persist across tabs and browser restarts on that device. The shopping cart remains in `sessionStorage`. The shared message contains a versioned inventory data block; paste the complete message into the page's Import panel on another device or browser to restore those counts. Import replaces existing counts after confirmation.
+The separate `inventory.html` page lets staff count products, auto-saves counts and the latest readable report in browser `localStorage`, and generates a stocktake report that can be copied or shared through WhatsApp. These inventory records persist across tabs and browser restarts on that device. The shopping cart remains in `sessionStorage`. Portable count data is a separate option under Export inventory data; copy it or send it through WhatsApp, then paste it into Import counts on another device or browser. Import replaces existing counts after confirmation. The readable report itself does not contain the data payload.
 
 ## Run locally
 

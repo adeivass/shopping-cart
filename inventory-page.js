@@ -22,6 +22,7 @@ const inventoryUI = {
   reportStatus: document.querySelector('#report-status'),
   importMessage: document.querySelector('#import-message'),
   importStatus: document.querySelector('#import-status'),
+  exportStatus: document.querySelector('#export-status'),
   toast: document.querySelector('#toast'),
 };
 
@@ -97,10 +98,10 @@ function decodeInventoryPayload(encoded) {
 function parseInventoryMessage(message) {
   const marker = 'INVENTORY_DATA_V1';
   const occurrences = message.split(marker).length - 1;
-  if (occurrences !== 1) throw new Error('Could not find one inventory data block. Paste the complete report message.');
+  if (occurrences !== 1) throw new Error('Could not find one inventory data block. Paste the standalone export data or a message containing that block.');
 
   const match = message.match(/INVENTORY_DATA_V1\s*\n([A-Za-z0-9_-]+)\s*\nEND_INVENTORY_DATA/);
-  if (!match) throw new Error('The inventory data block is incomplete. Copy the full report, including its data block.');
+  if (!match) throw new Error('The inventory data block is incomplete. Copy the complete standalone export data.');
   if (match[1].length > 12000) throw new Error('This inventory data block is too large to import.');
 
   let payload;
@@ -111,7 +112,7 @@ function parseInventoryMessage(message) {
   }
 
   if (!payload || payload.schemaVersion !== 1 || payload.catalog !== 'field-fork') {
-    throw new Error('This inventory report version is not supported.');
+    throw new Error('This inventory data version is not supported.');
   }
   if (!payload.counts || typeof payload.counts !== 'object' || Array.isArray(payload.counts)) {
     throw new Error('The report does not contain valid product counts.');
@@ -129,6 +130,27 @@ function parseInventoryMessage(message) {
   return importedCounts;
 }
 
+function makeInventoryExportData() {
+  const payload = {
+    schemaVersion: 1,
+    catalog: 'field-fork',
+    generatedAt: new Date().toISOString(),
+    counts: inventoryState.counts,
+  };
+  return [
+    'FIELD & FORK — PORTABLE INVENTORY DATA',
+    'Copy this data block and paste it into Inventory → Import counts.',
+    'INVENTORY_DATA_V1',
+    encodeInventoryPayload(payload),
+    'END_INVENTORY_DATA',
+  ].join('\n');
+}
+
+function updateExportShareLink() {
+  const number = String(window.GROCERY_WHATSAPP_NUMBER || '').replace(/\D/g, '');
+  document.querySelector('#share-export-data').href = `https://wa.me/${number}?text=${encodeURIComponent(makeInventoryExportData())}`;
+}
+
 function saveCounts() {
   try {
     localStorage.setItem(COUNT_STORAGE_KEY, JSON.stringify(inventoryState.counts));
@@ -136,6 +158,7 @@ function saveCounts() {
   } catch {
     inventoryUI.saveStatus.textContent = 'Could not save counts in this browser. Check storage permissions.';
   }
+  updateExportShareLink();
 }
 
 function updateSummary() {
@@ -260,21 +283,7 @@ function makeInventoryReport() {
     lines.push('Stocktake complete — all products counted.');
   }
 
-  const text = lines.join('\n');
-  const payload = {
-    schemaVersion: 1,
-    catalog: 'field-fork',
-    generatedAt: now.toISOString(),
-    counts: inventoryState.counts,
-  };
-  const exportText = [
-    text,
-    '--- COPY/IMPORT DATA ---',
-    'INVENTORY_DATA_V1',
-    encodeInventoryPayload(payload),
-    'END_INVENTORY_DATA',
-  ].join('\n');
-  return { text, exportText, date, counted: countedProducts.length, units: unitTotal, stale: false };
+  return { text: lines.join('\n'), date, counted: countedProducts.length, units: unitTotal, stale: false };
 }
 
 function displayReport(report) {
@@ -285,7 +294,7 @@ function displayReport(report) {
   inventoryUI.reportSection.hidden = false;
   inventoryUI.reportSection.classList.toggle('report-stale', Boolean(report.stale));
   const number = String(window.GROCERY_WHATSAPP_NUMBER || '').replace(/\D/g, '');
-  document.querySelector('#share-report').href = `https://wa.me/${number}?text=${encodeURIComponent(report.exportText || report.text)}`;
+  document.querySelector('#share-report').href = `https://wa.me/${number}?text=${encodeURIComponent(report.text)}`;
 }
 
 function generateAndSaveReport(shouldScroll = true) {
@@ -328,11 +337,11 @@ document.querySelector('#clear-counts').addEventListener('click', clearCounts);
 document.querySelector('#copy-report').addEventListener('click', async () => {
   const status = inventoryUI.reportStatus;
   try {
-    await navigator.clipboard.writeText(inventoryState.report.exportText || inventoryState.report.text);
-    status.textContent = 'Report and import data copied. Paste into WhatsApp or the Import panel.';
+    await navigator.clipboard.writeText(inventoryState.report.text);
+    status.textContent = 'Readable inventory report copied.';
   } catch {
     const textArea = document.createElement('textarea');
-    textArea.value = inventoryState.report.exportText || inventoryState.report.text;
+    textArea.value = inventoryState.report.text;
     textArea.setAttribute('readonly', '');
     textArea.style.position = 'fixed';
     textArea.style.opacity = '0';
@@ -340,8 +349,33 @@ document.querySelector('#copy-report').addEventListener('click', async () => {
     textArea.select();
     const copied = document.execCommand('copy');
     textArea.remove();
-    status.textContent = copied ? 'Report and import data copied. Paste into WhatsApp or the Import panel.' : 'Copy was blocked. Use the WhatsApp share button instead.';
+    status.textContent = copied ? 'Readable inventory report copied.' : 'Copy was blocked. Use the WhatsApp report button instead.';
   }
+});
+
+document.querySelector('#copy-export-data').addEventListener('click', async () => {
+  const exportData = makeInventoryExportData();
+  try {
+    await navigator.clipboard.writeText(exportData);
+    inventoryUI.exportStatus.textContent = 'Portable data copied. Paste it into the Import counts panel on another device.';
+  } catch {
+    const textArea = document.createElement('textarea');
+    textArea.value = exportData;
+    textArea.setAttribute('readonly', '');
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.append(textArea);
+    textArea.select();
+    const copied = document.execCommand('copy');
+    textArea.remove();
+    inventoryUI.exportStatus.textContent = copied
+      ? 'Portable data copied. Paste it into the Import counts panel on another device.'
+      : 'Copy was blocked. Try the WhatsApp data button instead.';
+  }
+});
+
+document.querySelector('#share-export-data').addEventListener('click', () => {
+  inventoryUI.exportStatus.textContent = 'Opening WhatsApp with the standalone import data block.';
 });
 
 document.querySelector('#import-report').addEventListener('click', () => {
@@ -380,5 +414,5 @@ document.querySelector('#share-report').addEventListener('click', () => {
 renderCategoryOptions();
 renderInventoryList();
 updateSummary();
-if (inventoryState.report?.exportText) displayReport(inventoryState.report);
-else if (inventoryState.report) generateAndSaveReport(false);
+updateExportShareLink();
+if (inventoryState.report) displayReport(inventoryState.report);
