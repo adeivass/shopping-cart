@@ -33,12 +33,20 @@
       </section>
 
       <section class="inventory-tool" aria-label="Inventory count form">
+        <details class="import-panel export-panel" id="export-panel">
+          <summary><span><strong>Export inventory data</strong><small>Copy or send a standalone data block to import counts elsewhere.</small></span><span class="import-chevron" aria-hidden="true">⌄</span></summary>
+          <div class="import-panel-content">
+            <p class="transfer-explainer">This data transfer is separate from the readable inventory report. It includes the product counts and can be pasted into another copy of this page.</p>
+            <div class="data-export-actions"><button class="button button-dark" id="copy-export-data" type="button">Copy export data <span>▣</span></button><a class="button button-whatsapp" id="share-export-data" href="#" target="_blank" rel="noopener noreferrer"><span class="whatsapp-icon">◉</span> Send data on WhatsApp <span>↗</span></a></div>
+            <p class="export-status" id="export-status" aria-live="polite"></p>
+          </div>
+        </details>
         <details class="import-panel" id="import-panel">
           <summary><span><strong>Import counts from a shared message</strong><small>Paste a Field &amp; Fork inventory report to continue in this session.</small></span><span class="import-chevron" aria-hidden="true">⌄</span></summary>
           <div class="import-panel-content">
             <label class="visually-hidden" for="import-message">Paste the complete inventory message</label>
             <textarea id="import-message" rows="5" placeholder="Paste the full inventory message here…" spellcheck="false"></textarea>
-            <div class="import-panel-footer"><p>Import replaces counts currently saved on this device. Only reports with the built-in inventory data block can be imported.</p><button class="button button-dark" id="import-report" type="button">Import counts <span>↙</span></button></div>
+            <div class="import-panel-footer"><p>Paste an exported data block. Import replaces counts currently saved on this device.</p><button class="button button-dark" id="import-report" type="button">Import counts <span>↙</span></button></div>
             <p class="import-status" id="import-status" aria-live="polite"></p>
           </div>
         </details>
@@ -52,7 +60,7 @@
       <section class="inventory-report" id="report-section" hidden aria-labelledby="report-title">
         <div class="report-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> READY TO SHARE</div><h2 id="report-title">Inventory report</h2><p id="report-meta"></p></div><span class="report-saved-badge">Saved in this session</span></div>
         <pre class="report-preview" id="report-preview"></pre>
-        <div class="report-actions"><button class="button button-dark" id="copy-report" type="button">Copy report + data <span>▣</span></button><a class="button button-whatsapp" id="share-report" href="#" target="_blank" rel="noopener noreferrer"><span class="whatsapp-icon">◉</span> Send on WhatsApp <span>↗</span></a></div>
+        <div class="report-actions"><button class="button button-dark" id="copy-report" type="button">Copy report <span>▣</span></button><a class="button button-whatsapp" id="share-report" href="#" target="_blank" rel="noopener noreferrer"><span class="whatsapp-icon">◉</span> Send report on WhatsApp <span>↗</span></a></div>
         <p class="report-status" id="report-status" aria-live="polite"></p>
       </section>
     </main>
